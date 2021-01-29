@@ -1,16 +1,15 @@
 #!C:\Users\황지환\AppData\Local\Programs\Python\Python39\python.exe
 print("Content-Type: text/html")
 print()
-import cgi, os
-files = os.listdir('data')
-listStr = '' 
-for item in files:
-   listStr = listStr + '<li><a href = "index.py?id={name}">{name}</a></li>'.format(name = item)
+import cgi, os, view, html_sanitizer 
+sanitizer = html_sanitizer.Sanitizer() 
 
 form = cgi.FieldStorage()
 if 'id' in form:
-  pageId = form["id"].value
+  title = pageId = form["id"].value
   description = open('data/' + pageId, 'r').read()
+  description = sanitizer.sanitize(description)
+  title = sanitizer.sanitize(title)
   update_link = '<a href="update.py?id={}">update</a>'.format(pageId)
   delete_action = '''
       <form action="process_delete.py" method="post">
@@ -30,7 +29,7 @@ print('''<!doctype html>
   <title>WEB1 - Welcome</title>
   <meta charset="utf-8">
 </head>
-<body>
+<body>r
   <h1><a href="index.py">WEB</a></h1>
   <ol>
     {list}
@@ -43,4 +42,9 @@ print('''<!doctype html>
   
 </body>
 </html>
-'''.format(title=pageId, list = listStr, desc = description, update_link = update_link, delete_action = delete_action))
+'''.format(
+    title = title, 
+    list = view.getList(), 
+    desc = description, 
+    update_link = update_link, 
+    delete_action = delete_action))
